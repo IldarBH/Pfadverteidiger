@@ -15,14 +15,6 @@ public class ContinueCareerButton : MonoBehaviour
     private void OnButtonClick()
     {
         Debug.Log("Continue Career Button Clicked");
-        var player = SaveSystem.LoadPlayerData();
-        if (player != null)
-        {
-            Debug.Log($"Loaded player data: {player.Name}, {player.Score}");
-        }
-        else
-        {
-            Debug.LogWarning("No player data found.");
-        }
+        GameManager.LoadCareer();
     }
 }

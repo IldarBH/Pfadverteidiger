@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class NewCareerButton : MonoBehaviour
 {   
@@ -14,9 +15,7 @@ public class NewCareerButton : MonoBehaviour
 
     private void OnButtonClick()
     {
-        Debug.Log("New Career Button Clicked");
-        var player = PlayerData.CreateInstance("NewPlayer", 1000);
-        var savePath = SaveSystem.SavePlayerData(player);
-        Debug.Log($"New player data saved to: {savePath}");
+        GameManager.StartNewCareer("NewPlayer");
+        SceneManager.LoadScene("CareerMenu");
     }
 }
