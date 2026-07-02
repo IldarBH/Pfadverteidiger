@@ -34,15 +34,14 @@ public class SaveSystem
         if (string.IsNullOrWhiteSpace(latestSaveFile) || !File.Exists(latestSaveFile)) return null;
         try {
             var json = File.ReadAllText(latestSaveFile);
-            var serializableData = JsonUtility.FromJson<PlayerData.SerializablePlayerData>(json);
-            return new PlayerData(serializableData);
+            return JsonUtility.FromJson<PlayerData>(json);
         } catch (Exception ex) {
             Debug.LogError($"Failed to load player data from {latestSaveFile}: {ex.Message}");
             return null;
         }
     }
 
-    public static string SavePlayerData(PlayerData.SerializablePlayerData playerData)
+    public static string SavePlayerData(PlayerData playerData)
     {
         if (playerData == null) throw new ArgumentNullException(nameof(playerData));
         if (!Directory.Exists(_saveFolder)) Directory.CreateDirectory(_saveFolder);
@@ -59,15 +58,14 @@ public class SaveSystem
         if (string.IsNullOrWhiteSpace(latestSaveFile) || !File.Exists(latestSaveFile)) return null;
         try {
             var json = File.ReadAllText(latestSaveFile);
-            var serializableData = JsonUtility.FromJson<ShipData.SerializableShipData>(json);
-            return new ShipData(serializableData);
+            return JsonUtility.FromJson<ShipData>(json);
         } catch (Exception ex) {
             Debug.LogError($"Failed to load ship data from {latestSaveFile}: {ex.Message}");
             return null;
         }
     }
 
-    public static string SaveShipData(ShipData.SerializableShipData shipData)
+    public static string SaveShipData(ShipData shipData)
     {
         if (shipData == null) throw new ArgumentNullException(nameof(shipData));
         if (!Directory.Exists(_saveFolder)) Directory.CreateDirectory(_saveFolder);
