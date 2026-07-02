@@ -15,11 +15,11 @@ public class SaveSystem
         public uint level;
     }
 
-    public static string FindLatestSaveFile(string saveFolder)
+    public static string FindLatestSaveFile(string searchFolder)
     {
         // Check if the save folder exists and if there are any save files in it
-        if (!Directory.Exists(saveFolder)) return null;
-        var saveFiles = Directory.GetFiles(_saveFolder, "*.save");
+        if (!Directory.Exists(searchFolder)) return null;
+        var saveFiles = Directory.GetFiles(searchFolder, "*.save");
         if (saveFiles.Length == 0) return null;
 
         // Find the latest save file based on the last write time
@@ -40,8 +40,13 @@ public class SaveSystem
     public static PlayerDataSave LoadPlayerData(string saveFile)
     {
         if (string.IsNullOrWhiteSpace(saveFile) || !File.Exists(saveFile)) return null;
-        var json = File.ReadAllText(saveFile);
-        return JsonUtility.FromJson<PlayerDataSave>(json);
+        try {
+            var json = File.ReadAllText(saveFile);
+            return JsonUtility.FromJson<PlayerDataSave>(json);
+        } catch (Exception ex) {
+            Debug.LogError($"Failed to load player data from {saveFile}: {ex.Message}");
+            return null;
+        }
     }
 
     public static PlayerData LoadPlayerData()
@@ -70,7 +75,7 @@ public class SaveSystem
             level = playerData.Level
         };
         File.WriteAllText(saveFile, JsonUtility.ToJson(saveData, true));
-        return fileName;
+        return saveFile;
     }
 
 }
