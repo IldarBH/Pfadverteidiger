@@ -12,8 +12,16 @@ Logs/
 ProjectSettings/
 Temp/
 UserSettings/
-.vscode
+.vscode/
+.github/
 
 *.csproj
 *.slnx
 *.meta
+*.jpg
+*.png
+*.hdr
+*.fbx
+*.mat
+*.unity
+*.asset
