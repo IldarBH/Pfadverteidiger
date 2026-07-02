@@ -9,10 +9,10 @@ public class SaveSystem
     [Serializable]
     public class PlayerDataSave
     {
-        public string Name;
-        public uint Credits;
-        public uint Experience;
-        public uint Level;
+        public string name;
+        public int credits;
+        public int experience;
+        public uint level;
     }
 
     public static string FindLatestSaveFile(string saveFolder)
@@ -52,7 +52,7 @@ public class SaveSystem
         {
             return null;
         }
-        return PlayerData.CreateInstance(playerSaveData.Name, playerSaveData.Credits, playerSaveData.Level, playerSaveData.Experience);
+        return PlayerData.CreateInstance(playerSaveData.name, playerSaveData.credits, playerSaveData.experience, playerSaveData.level);
     }
 
     public static string SavePlayerData(PlayerData playerData)
@@ -64,10 +64,10 @@ public class SaveSystem
         var saveFile = Path.Combine(_saveFolder, fileName + ".save");
         var saveData = new PlayerDataSave
         {
-            Name = playerData.Name,
-            Credits = playerData.Credits,
-            Level = playerData.Level,
-            Experience = playerData.Experience
+            name = playerData.Name,
+            credits = playerData.Credits,
+            experience = playerData.Experience,
+            level = playerData.Level
         };
         File.WriteAllText(saveFile, JsonUtility.ToJson(saveData, true));
         return fileName;

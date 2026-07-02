@@ -1,32 +1,27 @@
-using Codice.CM.SEIDInfo;
-using UnityEngine;
-
-[CreateAssetMenu(fileName = "PlayerData", menuName = "Scriptable Objects/PlayerData")]
-public class PlayerData : ScriptableObject
+public class PlayerData
 {
     private string _name;
-    private uint _credits = 0;
+    private int _credits = 0;
+    private int _experience = 0;
     private uint _level = 0;
-    private uint _experience = 0;
-
-    public void Initialize(string name, uint level = 0, uint experience = 0)
+    public void Initialize(string name, int experience = 0, uint level = 0u)
     {
         _name = name;
-        _level = level;
         _experience = experience;
+        _level = level;
     }
     public string Name { get => _name; }
-    public uint Experience { get => _experience; }
-    public uint Credits { get => _credits; }
+    public int Experience { get => _experience; }
+    public int Credits { get => _credits; }
     public uint Level { get => _level; }
-    public void AddCredits(uint amount) { _credits += amount; }
-    public void SubtractCredits(uint amount) { _credits -= amount; }
-    public void AddExperience(uint amount) { _experience += amount; }
-    public void SubtractExperience(uint amount) { _experience -= amount; }
-    public static PlayerData CreateInstance(string name, uint credits = 1000, uint level = 0, uint experience = 0)
+    public void AddCredits(int amount) { _credits += amount; }
+    public void SubtractCredits(int amount) { _credits -= amount; }
+    public void AddExperience(int amount) { _experience += amount; }
+    public void SubtractExperience(int amount) { _experience -= amount; }
+    public static PlayerData CreateInstance(string name, int credits = 1000, int experience = 0, uint level = 0u)
     {
-        PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
-        playerData.Initialize(name, level, experience);
+        PlayerData playerData = new PlayerData();
+        playerData.Initialize(name, experience, level);
         playerData.AddCredits(credits);
         return playerData;
     }
