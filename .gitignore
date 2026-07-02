@@ -1,0 +1,27 @@
+Assets/TutorialInfo/
+Assets/Textures/
+Assets/Models/
+Assets/Scenes/
+Assets/TextMesh Pro/
+Assets/Settings/
+Blender/
+Packages/
+ProfilerCaptures/
+Library/
+Logs/
+ProjectSettings/
+Temp/
+UserSettings/
+.vscode/
+.github/
+
+*.csproj
+*.slnx
+*.meta
+*.jpg
+*.png
+*.hdr
+*.fbx
+*.mat
+*.unity
+*.asset
