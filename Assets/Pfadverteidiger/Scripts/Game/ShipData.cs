@@ -48,7 +48,7 @@ public class ShipProperty
 [Serializable]
 public class ShipData 
 {
-    [field: SerializeField] public string PrefabPath { get; set; } = "Prefabs/Ships/SSH-MK1/SSH-MK1.prefab";
+    [field: SerializeField] public string PrefabPath { get; set; } = "Prefabs/Ships/SSH-MK1/SSH-MK1";
     [field: SerializeField] public ShipProperty Health { get; private set; } = new ShipProperty(100, 10, startLevel: 1);
     [field: SerializeField] public ShipProperty Armor { get; private set; } = new ShipProperty(50, 5, startLevel: 1);
     
