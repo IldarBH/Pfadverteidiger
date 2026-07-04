@@ -12,14 +12,14 @@ public class StartupCanvas : MonoBehaviour
 
     void Awake()
     {
-        _careerMenu = GameObject.Find("CareerMenu").GetComponent<Button>();
+        _careerMenu = transform.Find("CareerMenu").GetComponent<Button>();
         UtilityHelpers.RegisterEvent<Button>(_careerMenu, EventTriggerType.PointerEnter, (data) => OnCareerMenuHover(data));
-        _careerNew = GameObject.Find("CareerNew").GetComponent<Button>();
-        UtilityHelpers.RegisterEvent<Button>(_careerNew, EventTriggerType.PointerClick, (data) => OnCareerNewClicked(data));
-        _careerContinue = GameObject.Find("CareerContinue").GetComponent<Button>();
-        UtilityHelpers.RegisterEvent<Button>(_careerContinue, EventTriggerType.PointerClick, (data) => OnCareerContinueClicked(data));
-        _careerPanel = GameObject.Find("CareerPanel").GetComponent<RectTransform>();
+        _careerPanel = transform.Find("CareerPanel").GetComponent<RectTransform>();
         UtilityHelpers.RegisterEvent<RectTransform>(_careerPanel, EventTriggerType.PointerExit, (data) => OnCareerPanelExit(data));
+        _careerNew = _careerPanel.transform.Find("CareerNew").GetComponent<Button>();
+        UtilityHelpers.RegisterEvent<Button>(_careerNew, EventTriggerType.PointerClick, (data) => OnCareerNewClicked(data));
+        _careerContinue = _careerPanel.transform.Find("CareerContinue").GetComponent<Button>();
+        UtilityHelpers.RegisterEvent<Button>(_careerContinue, EventTriggerType.PointerClick, (data) => OnCareerContinueClicked(data));
         
         _mainMenuScene = GameObject.Find("MainMenuScene").GetComponent<MainMenuScene>();
     }

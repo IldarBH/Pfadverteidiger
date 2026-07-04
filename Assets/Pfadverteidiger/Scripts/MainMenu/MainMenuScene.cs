@@ -5,9 +5,18 @@ using UnityEngine.UI;
 
 public class MainMenuScene : MonoBehaviour
 {
+    private enum SceneState
+    {
+        Startup,
+        Career,
+        Contract
+    }
+
     private StartupCanvas _startupCanvas;
     private CareerCanvas _careerCanvas;
+    private ContractCanvas _contractCanvas;
     public MainMenuCamera MainCamera;
+    private SceneState _state = SceneState.Startup;
 
     void Awake()
     {
@@ -24,26 +33,61 @@ public class MainMenuScene : MonoBehaviour
 
         _startupCanvas = GameObject.Find("StartupCanvas").GetComponent<StartupCanvas>();
         _careerCanvas = GameObject.Find("CareerCanvas").GetComponent<CareerCanvas>();
+        _contractCanvas = GameObject.Find("ContractCanvas").GetComponent<ContractCanvas>();
     }
 
     void OnEnable()
     {
         _startupCanvas.gameObject.SetActive(true);
         _careerCanvas.gameObject.SetActive(false);
+        _contractCanvas.gameObject.SetActive(false);
     }
 
     public void GoToCareer()
     {
-        MainCamera.GoToCareer();
-        _startupCanvas.gameObject.SetActive(false);
+        if (_state == SceneState.Career) return;
+        switch (_state)
+        {
+            case SceneState.Startup:
+                MainCamera.StartupToCareer();
+                break;
+            case SceneState.Contract:
+                MainCamera.ContractToCareer();
+                break;
+        }
+        _state = SceneState.Career;
         _careerCanvas.gameObject.SetActive(true);
-        
+        _startupCanvas.gameObject.SetActive(false);
+        _contractCanvas.gameObject.SetActive(false);
     }
 
     public void GoToStartup()
     {
-        MainCamera.GoToStartup();
+        if (_state == SceneState.Startup) return;
+        switch (_state)
+        {
+            case SceneState.Career:
+                MainCamera.CareerToStartup();
+                break;
+        }
+        _state = SceneState.Startup;
         _startupCanvas.gameObject.SetActive(true);
         _careerCanvas.gameObject.SetActive(false);
+        _contractCanvas.gameObject.SetActive(false);
+    }
+
+    public void GoToContract()
+    {
+        if (_state == SceneState.Contract) return;
+        switch (_state)
+        {
+            case SceneState.Career:
+                MainCamera.CareerToContract();
+                break;
+        }
+        _state = SceneState.Contract;
+        _startupCanvas.gameObject.SetActive(false);
+        _careerCanvas.gameObject.SetActive(false);
+        _contractCanvas.gameObject.SetActive(true);
     }
 }
