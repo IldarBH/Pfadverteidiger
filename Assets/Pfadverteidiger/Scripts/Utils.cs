@@ -10,5 +10,13 @@ public static class UtilityHelpers
         entry.callback.AddListener(callback);
         trigger.triggers.Add(entry);
     }
-}
 
+    public static void RegisterEvent<T>(T component, EventTriggerType type, UnityEngine.Events.UnityAction<BaseEventData> callback) where T : Component
+    {
+        if (!component.TryGetComponent<EventTrigger>(out var trigger))
+        {
+            trigger = component.gameObject.AddComponent<EventTrigger>();
+        }
+        RegisterTrigger(trigger, type, callback);
+    }
+}
