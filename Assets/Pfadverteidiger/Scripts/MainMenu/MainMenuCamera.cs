@@ -8,8 +8,8 @@ public class MainMenuCamera : MonoBehaviour
         _animator = GetComponent<Animator>();
     }
 
-    public void StartupToCareer() { _animator.Play("StartupToCareer"); }
-    public void CareerToStartup() { _animator.Play("CareerToStartup"); }
-    public void CareerToContract() { _animator.Play("CareerToContract"); }
-    public void ContractToCareer() { _animator.Play("ContractToCareer"); }
+    public void StartupToCareer() { _animator.SetTrigger("StartupToCareer"); }
+    public void CareerToStartup() { _animator.SetTrigger("CareerToStartup"); }
+    public void CareerToContract() { _animator.SetTrigger("CareerToContract"); }
+    public void ContractToCareer() { _animator.SetTrigger("ContractToCareer"); }
 }

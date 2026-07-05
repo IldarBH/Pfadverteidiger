@@ -34,10 +34,6 @@ public class MainMenuScene : MonoBehaviour
         _startupCanvas = GameObject.Find("StartupCanvas").GetComponent<StartupCanvas>();
         _careerCanvas = GameObject.Find("CareerCanvas").GetComponent<CareerCanvas>();
         _contractCanvas = GameObject.Find("ContractCanvas").GetComponent<ContractCanvas>();
-    }
-
-    void OnEnable()
-    {
         _startupCanvas.gameObject.SetActive(true);
         _careerCanvas.gameObject.SetActive(false);
         _contractCanvas.gameObject.SetActive(false);
