@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class ContractItem : MonoBehaviour
 {
@@ -7,17 +9,20 @@ public class ContractItem : MonoBehaviour
     private uint _enterCount = 0;
     private RectTransform _rectTransform;
     private RectTransform _contractPanel;
+    private Button _accept;
     private TMPro.TextMeshProUGUI _nameText;
     void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
         _contractPanel = transform.Find("Panel").GetComponent<RectTransform>();
         _nameText = _contractPanel.transform.Find("NameText").GetComponent<TMPro.TextMeshProUGUI>();
+        _accept = _contractPanel.transform.Find("Accept").GetComponent<Button>();
 
         UtilityHelpers.RegisterEvent(_rectTransform, EventTriggerType.PointerEnter, (data) => OnRectEnter(data));
         UtilityHelpers.RegisterEvent(_rectTransform, EventTriggerType.PointerExit, (data) => OnRectExit(data));
         UtilityHelpers.RegisterEvent(_contractPanel, EventTriggerType.PointerEnter, (data) => OnPanelEnter(data));
         UtilityHelpers.RegisterEvent(_contractPanel, EventTriggerType.PointerExit, (data) => OnPanelExit(data));
+        UtilityHelpers.RegisterEvent(_accept, EventTriggerType.PointerClick, (data) => OnAcceptClick(data));
 
         _contractPanel.gameObject.SetActive(false);
     }
@@ -71,5 +76,11 @@ public class ContractItem : MonoBehaviour
         _enterCount--;
         if (_enterCount == 0)
             _contractPanel.gameObject.SetActive(false);
+    }
+
+    void OnAcceptClick(BaseEventData data)
+    {
+        Debug.Log("Contract accepted!");
+        SceneManager.LoadScene("Battle");
     }
 }
