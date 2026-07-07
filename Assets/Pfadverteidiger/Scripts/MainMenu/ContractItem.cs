@@ -5,12 +5,13 @@ using UnityEngine.UI;
 
 public class ContractItem : MonoBehaviour
 {
-    private enum Quarter { TopLeft, TopRight, BottomLeft, BottomRight }
+    private enum HorizontalSide { Left, Right }
     private uint _enterCount = 0;
     private RectTransform _rectTransform;
     private RectTransform _contractPanel;
     private Button _accept;
     private TMPro.TextMeshProUGUI _nameText;
+    private Contract _contract;
     void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
@@ -29,27 +30,23 @@ public class ContractItem : MonoBehaviour
 
     public void SetContract(Contract contract)
     {
+        _contract = contract;
         _nameText.text = contract.Name;
     }
 
     public void SetPosition(Vector2 position)
     {
         _rectTransform.anchoredPosition = position;
-        var quarter = position.x >= 0
-            ? (position.y >= 0 ? Quarter.TopRight : Quarter.BottomRight)
-            : (position.y >= 0 ? Quarter.TopLeft : Quarter.BottomLeft);
-        SetPanelAnchor(quarter);
-        Debug.Log($"ContractItem position set to: {position}, quarter: {quarter}");
+        var side = position.x >= 0 ? HorizontalSide.Right : HorizontalSide.Left;
+        SetPanelAnchor(side);
     }
 
-    private void SetPanelAnchor(Quarter quarter)
+    private void SetPanelAnchor(HorizontalSide side)
     {
-        var anchor = quarter switch
+        var anchor = side switch
         {
-            Quarter.TopRight    => new Vector2(1f, 1f),
-            Quarter.TopLeft     => new Vector2(0f, 1f),
-            Quarter.BottomRight => new Vector2(1f, 0f),
-            Quarter.BottomLeft  => new Vector2(0f, 0f),
+            HorizontalSide.Right => new Vector2(1f, 1f),
+            HorizontalSide.Left  => new Vector2(0f, 1f),
             _                   => new Vector2(0f, 0f)
         };
         _contractPanel.pivot = anchor;
@@ -80,7 +77,7 @@ public class ContractItem : MonoBehaviour
 
     void OnAcceptClick(BaseEventData data)
     {
-        Debug.Log("Contract accepted!");
+        BattleManager.ActiveContract = _contract;
         SceneManager.LoadScene("Battle");
     }
 }

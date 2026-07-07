@@ -3,6 +3,7 @@ using System.Collections.Generic;
 public class Contract
 {
     public string Name { get; set; }
+    public List<ThreatGroup> ThreatGroups { get; set; }
 }
 
 public static class ContractManager
@@ -16,6 +17,7 @@ public static class ContractManager
         {
             Contract contract = new Contract();
             contract.Name = $"Contract {i + 1}";
+            contract.ThreatGroups = new List<ThreatGroup>{ ThreatGroup.CosmicHazard };
             _contracts.Add(contract);
         }
         return _contracts;

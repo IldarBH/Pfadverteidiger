@@ -48,7 +48,11 @@ public class StartupCanvas : MonoBehaviour
 
     private void OnCareerContinueClicked(BaseEventData data)
     {
-        GameManager.LoadCareer();
+        if (!GameManager.LoadCareer())
+        {
+            Debug.LogWarning("No saved career found.");
+            return;
+        }
         _careerPanel.gameObject.SetActive(false);
         _mainMenuScene.GoToCareer();
     }

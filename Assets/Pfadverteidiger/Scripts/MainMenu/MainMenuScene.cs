@@ -37,6 +37,11 @@ public class MainMenuScene : MonoBehaviour
         _startupCanvas.gameObject.SetActive(true);
         _careerCanvas.gameObject.SetActive(false);
         _contractCanvas.gameObject.SetActive(false);
+        
+        if (GameManager.IsCareerLoaded)
+        {
+            GoToCareer();
+        }
     }
 
     public void GoToCareer()
