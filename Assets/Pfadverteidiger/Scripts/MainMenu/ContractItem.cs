@@ -77,7 +77,6 @@ public class ContractItem : MonoBehaviour
 
     void OnAcceptClick(BaseEventData data)
     {
-        BattleManager.ActiveContract = _contract;
         SceneManager.LoadScene("Battle");
     }
 }
