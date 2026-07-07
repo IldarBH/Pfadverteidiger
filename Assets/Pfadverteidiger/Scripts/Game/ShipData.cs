@@ -42,6 +42,13 @@ public class ShipProperty
         Level++;
         UpdateMaxValue();
     }
+
+    public uint SubtractValue(uint amount)
+    {
+        var actualAmount = Math.Min(amount, Value);
+        Value -= actualAmount;
+        return actualAmount;
+    }
 }
 
 [Serializable]
@@ -54,4 +61,11 @@ public class ShipData
     public ShipData() {}
 
     public string ShipName() { return System.IO.Path.GetFileNameWithoutExtension(PrefabPath); }
+
+    public void Hit(uint damage)
+    {
+        var damage_to_armor = Armor.SubtractValue(damage);
+        var damage_to_health = damage - damage_to_armor;
+        Health.SubtractValue(damage_to_health);
+    }
 }
