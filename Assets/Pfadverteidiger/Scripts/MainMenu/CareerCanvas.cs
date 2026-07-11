@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 public class CareerCanvas : MonoBehaviour
 {
     private Button _contractMenu;
+    private Button _hangarMenu;
     private Button _goBack;
     private MainMenuScene _mainMenuScene;
     private RectTransform _careerPanel;
@@ -19,6 +20,8 @@ public class CareerCanvas : MonoBehaviour
         _careerPanel = transform.Find("CareerPanel").GetComponent<RectTransform>();
         _contractMenu = _careerPanel.transform.Find("ContractMenu").GetComponent<Button>();
         UtilityHelpers.RegisterEvent<Button>(_contractMenu, EventTriggerType.PointerClick, (data) => OnContractMenuClicked(data));
+        _hangarMenu = _careerPanel.transform.Find("HangarMenu").GetComponent<Button>();
+        UtilityHelpers.RegisterEvent<Button>(_hangarMenu, EventTriggerType.PointerClick, (data) => OnHangarMenuClicked(data));
     }
 
     private void OnGoBackClicked(BaseEventData data)
@@ -29,5 +32,10 @@ public class CareerCanvas : MonoBehaviour
     private void OnContractMenuClicked(BaseEventData data)
     {
         _mainMenuScene.GoToContract();
+    }
+
+    private void OnHangarMenuClicked(BaseEventData data)
+    {
+        _mainMenuScene.GoToHangar();
     }
 }

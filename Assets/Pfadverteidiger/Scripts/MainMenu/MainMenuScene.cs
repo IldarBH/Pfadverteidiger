@@ -91,4 +91,9 @@ public class MainMenuScene : MonoBehaviour
         _careerCanvas.gameObject.SetActive(false);
         _contractCanvas.gameObject.SetActive(true);
     }
+
+    public void GoToHangar()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Hangar");
+    }
 }
