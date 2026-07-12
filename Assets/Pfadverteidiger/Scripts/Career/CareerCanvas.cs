@@ -10,8 +10,9 @@ public class CareerCanvas : MonoBehaviour
     private Button _goBack;
     private RectTransform _careerPanel;
 
-    void Awake()
+    public void Initialize(CareerScene careerScene)
     {
+        _careerScene = careerScene;
         _careerPanel = transform.Find("CareerPanel").GetComponent<RectTransform>();
         _contractMenu = _careerPanel.transform.Find("ContractMenu").GetComponent<Button>();
         UtilityHelpers.RegisterEvent<Button>(_contractMenu, EventTriggerType.PointerClick, (data) => OnContractMenuClicked(data));
@@ -19,11 +20,6 @@ public class CareerCanvas : MonoBehaviour
         UtilityHelpers.RegisterEvent<Button>(_hangarMenu, EventTriggerType.PointerClick, (data) => OnHangarMenuClicked(data));
         _goBack = transform.Find("Back").GetComponent<Button>();
         UtilityHelpers.RegisterEvent<Button>(_goBack, EventTriggerType.PointerClick, (data) => OnGoBackClicked(data));
-    }
-
-    public void Initialize(CareerScene careerScene)
-    {
-        _careerScene = careerScene;
     }
 
     private void OnGoBackClicked(BaseEventData data)

@@ -22,7 +22,7 @@ public class ContractCanvas : MonoBehaviour
     {
         _careerScene = careerScene;
         _contractPanel = transform.Find("ContractPanel").GetComponent<RectTransform>();
-        _contractItemPrefab = Resources.Load<GameObject>("Prefabs/MainMenu/ContractItem");
+        _contractItemPrefab = Resources.Load<GameObject>("Prefabs/Career/ContractItem");
         GenerateContracts(contractCount);
     }
 

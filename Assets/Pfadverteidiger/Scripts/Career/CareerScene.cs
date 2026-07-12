@@ -2,15 +2,9 @@ using UnityEngine;
 
 public class CareerScene : MonoBehaviour
 {
-    private enum State
-    {
-        Career,
-        Contract
-    }
     private CareerCanvas _careerCanvas;
     private ContractCanvas _contractCanvas;
     private CareerCamera _careerCamera;
-    private State _currentState = State.Career;
 
     private void Awake()
     {
@@ -20,7 +14,10 @@ public class CareerScene : MonoBehaviour
         _careerCanvas.Initialize(this);
         _contractCanvas = GameObject.Find("ContractCanvas").GetComponent<ContractCanvas>();
         _contractCanvas.Initialize(this);
-        
+    }
+
+    void OnEnable()
+    {
         _careerCanvas.gameObject.SetActive(true);
         _contractCanvas.gameObject.SetActive(false);
     }
@@ -42,7 +39,6 @@ public class CareerScene : MonoBehaviour
         _careerCamera.GoToContract();
         _careerCanvas.gameObject.SetActive(false);
         _contractCanvas.gameObject.SetActive(true);
-        _currentState = State.Contract;
     }
 
     public void GoToCareer()
@@ -50,6 +46,5 @@ public class CareerScene : MonoBehaviour
         _careerCamera.GoToCareer();
         _careerCanvas.gameObject.SetActive(true);
         _contractCanvas.gameObject.SetActive(false);
-        _currentState = State.Career;
     }
 }
