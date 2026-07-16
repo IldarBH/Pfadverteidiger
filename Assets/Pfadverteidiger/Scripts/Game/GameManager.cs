@@ -9,7 +9,7 @@ public static class GameManager
     public static bool StartNewCareer()
     {
         _player = new PlayerData();
-        _ship = SaveSystem.LoadShipData(_player.CurrentShip);
+        _ship = new ShipData();
         
         var playerSaveFile = SaveSystem.SavePlayerData(_player);
         var shipSaveFile = SaveSystem.SaveShipData(_ship);
@@ -52,5 +52,14 @@ public static class GameManager
             throw new InvalidOperationException("Ship data is not loaded.");
         }
         return _ship;
+    }
+
+    public static void UpdateShipData(ShipData newShipData)
+    {
+        if (newShipData == null)
+        {
+            throw new ArgumentNullException(nameof(newShipData), "New ship data cannot be null.");
+        }
+        _ship = newShipData;
     }
 }

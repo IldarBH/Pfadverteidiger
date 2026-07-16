@@ -8,7 +8,7 @@ public class PlayerData
     [field: SerializeField] public int Credits { get; private set; } = 1000;
     [field: SerializeField] public int Experience { get; private set; } = 0;
     [field: SerializeField] public uint Level { get; private set; } = 0;
-    [field: SerializeField] public string CurrentShip { get; private set; } = "SSH-MK1";
+    [field: SerializeField] public ShipType CurrentShip { get; private set; } = ShipType.SSH_MK1;
 
     public PlayerData() {}
 

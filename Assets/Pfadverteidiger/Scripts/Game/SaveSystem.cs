@@ -52,15 +52,15 @@ public class SaveSystem
         return saveFile;
     }
 
-    public static ShipData LoadShipData(string shipName)
+    public static ShipData LoadShipData(ShipType shipType)
     {
+        var shipName = shipType.ToString();
         var shipSaveFile = Path.Combine(_saveFolder, shipName + ".save");
-        if (string.IsNullOrWhiteSpace(shipSaveFile))
+        if (!Enum.IsDefined(typeof(ShipType), shipType))
         {
-            throw new ArgumentException("Ship name cannot be null or whitespace.", nameof(shipName));
-        } else if (!File.Exists(shipSaveFile)) 
-        {
-            return new ShipData();
+            throw new ArgumentException("Invalid ship type.", nameof(shipType));
+        }  else if (!File.Exists(shipSaveFile)) {
+            throw new FileNotFoundException($"Save file for ship type {shipType} not found.", shipSaveFile);
         }
         try {
             var json = File.ReadAllText(shipSaveFile);
@@ -75,7 +75,7 @@ public class SaveSystem
         if (shipData == null) throw new ArgumentNullException(nameof(shipData));
         if (!Directory.Exists(_saveFolder)) Directory.CreateDirectory(_saveFolder);
         
-        var fileName = shipData.ShipName();
+        var fileName = shipData.ShipType.ToString();
         var saveFile = Path.Combine(_saveFolder, fileName + ".save");
         File.WriteAllText(saveFile, JsonUtility.ToJson(shipData, true));
         return saveFile;
