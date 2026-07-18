@@ -55,7 +55,7 @@ public class ShipProperty
         Value = Math.Min(value, MaxValue);
     }
     
-    public void UpdateMaxValue() 
+    private void UpdateMaxValue() 
     { 
         MaxValue = BaseValue + UpgradeValue * (Level - 1);
     }

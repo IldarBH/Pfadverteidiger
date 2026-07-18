@@ -5,9 +5,15 @@ using System.Collections.Generic;
 public class HangarCanvas : MonoBehaviour
 {
     private HangarScene _hangarScene;
+    private PropertyPanel _hullPanel;
+    private RectTransform _buildPanel;
     private Button _buildPlatform;
     private Button _buildAccept;
     private Button _buildCancel;
+    private Button _exitButton;
+    private RectTransform _playerPanel;
+    private RectTransform _shipPanel;
+    private RectTransform _turretsPanel;
     private BuildPlatformPanel _updateTowerPanelPrefab;
     [SerializeField] public List<RectTransform> towerPanelInstances;
 
@@ -15,17 +21,43 @@ public class HangarCanvas : MonoBehaviour
     {
         _hangarScene = hangarScene;
         _updateTowerPanelPrefab = Resources.Load<BuildPlatformPanel>("Prefabs/Hangar/BuildPlatformPanel");
+        _hullPanel = transform.Find("Hull").GetComponent<PropertyPanel>();
+        _hullPanel.Initialize(GameManager.GetShipData().Health);
+        InitializeBuildPanel();
+        InitializePlayerPanel();
+        InitializeShipPanel();
+        InitializeTowerPanel();
+    }
 
-        _buildPlatform = transform.Find("BuildPlatform").GetComponent<Button>();
+    private void InitializeBuildPanel()
+    {
+        _buildPanel = transform.Find("BuildPanel").GetComponent<RectTransform>();
+        _buildPlatform = _buildPanel.Find("BuildPlatform").GetComponent<Button>();
         UtilityHelpers.RegisterEvent<Button>(_buildPlatform, EventTriggerType.PointerClick, (data) => OnBuildPlatformClicked(data));
-        _buildAccept = transform.Find("BuildAccept").GetComponent<Button>();
+        _buildAccept = _buildPanel.Find("BuildAccept").GetComponent<Button>();
         UtilityHelpers.RegisterEvent<Button>(_buildAccept, EventTriggerType.PointerClick, (data) => OnBuildAcceptClicked(data));
-        _buildCancel = transform.Find("BuildCancel").GetComponent<Button>();
+        _buildCancel = _buildPanel.Find("BuildCancel").GetComponent<Button>();
         UtilityHelpers.RegisterEvent<Button>(_buildCancel, EventTriggerType.PointerClick, (data) => OnBuildCancelClicked(data));
-
         _buildPlatform.gameObject.SetActive(true);
         _buildAccept.gameObject.SetActive(false);
         _buildCancel.gameObject.SetActive(false);
+    }
+
+    private void InitializePlayerPanel()
+    {
+        _playerPanel = transform.Find("PlayerData").GetComponent<RectTransform>();
+
+    }
+
+    private void InitializeShipPanel()
+    {
+        _shipPanel = transform.Find("ShipData").GetComponent<RectTransform>();
+
+    }
+
+    private void InitializeTowerPanel()
+    {
+        _turretsPanel = transform.Find("Turrets").GetComponent<RectTransform>();
     }
 
     private void OnBuildPlatformClicked(BaseEventData data)
