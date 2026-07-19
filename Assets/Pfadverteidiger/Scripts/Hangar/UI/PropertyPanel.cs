@@ -8,7 +8,6 @@ using UnityEngine.UI;
 public class PropertyPanel : MonoBehaviour
 {
     public string PropertyName;
-    private TMPro.TextMeshProUGUI _nameText;
     private TMPro.TextMeshProUGUI _currentValueText;
     private TMPro.TextMeshProUGUI _maxValueText;
     private TMPro.TextMeshProUGUI _restoreCostText;
@@ -24,7 +23,6 @@ public class PropertyPanel : MonoBehaviour
     {
         _property = property;
 
-        _nameText = transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>();
         _currentValueText = transform.Find("CurrentValue").GetComponent<TMPro.TextMeshProUGUI>();
         _maxValueText = transform.Find("MaxValue").GetComponent<TMPro.TextMeshProUGUI>();
         _restoreButton = transform.Find("Restore").GetComponent<Button>();
@@ -33,7 +31,6 @@ public class PropertyPanel : MonoBehaviour
         _upgradeCostText = _upgradeButton.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>();
         _indicatorImage = transform.Find("Indicator").GetComponent<Image>();
         
-        _nameText.text = PropertyName;
         _indicatorLevels = new SortedDictionary<float, int>();
         for (int i = 0; i < IndicatorSprites.Length; i++) {
             _indicatorLevels[(float)i / (IndicatorSprites.Length - 1)] = i;
