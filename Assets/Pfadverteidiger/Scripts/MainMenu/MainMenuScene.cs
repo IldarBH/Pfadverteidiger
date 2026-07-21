@@ -1,89 +1,43 @@
-using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class MainMenuScene : MonoBehaviour
 {
-    private enum SceneState
-    {
-        Startup,
-        Career,
-        Contract
-    }
-
     private StartupCanvas _startupCanvas;
-    private CareerCanvas _careerCanvas;
-    private ContractCanvas _contractCanvas;
-    public MainMenuCamera MainCamera;
-    private SceneState _state = SceneState.Startup;
 
     void Awake()
     {
-        if (MainCamera == null) MainCamera = GameObject.Find("MainCamera").GetComponent<MainMenuCamera>();
-
-        var shipPrefab = Resources.Load<GameObject>(GameManager.Ship.PrefabPath);
-        if (shipPrefab == null) {
-            Debug.LogError($"Ship prefab not found at path: {GameManager.Ship.PrefabPath}");
-        } else {
-            var shipInstance = Instantiate(shipPrefab, this.transform);
-            shipInstance.transform.localPosition = Vector3.zero;
-            shipInstance.transform.localRotation = Quaternion.identity;    
-        }
-
-        _startupCanvas = GameObject.Find("StartupCanvas").GetComponent<StartupCanvas>();
-        _careerCanvas = GameObject.Find("CareerCanvas").GetComponent<CareerCanvas>();
-        _contractCanvas = GameObject.Find("ContractCanvas").GetComponent<ContractCanvas>();
+        _startupCanvas = GameObject.Find("StartupCanvas").GetComponent<StartupCanvas>();        
         _startupCanvas.gameObject.SetActive(true);
-        _careerCanvas.gameObject.SetActive(false);
-        _contractCanvas.gameObject.SetActive(false);
+        _startupCanvas.Initialize(this);
     }
 
-    public void GoToCareer()
+    public void GoToNewCareer()
     {
-        if (_state == SceneState.Career) return;
-        switch (_state)
+        if (!GameManager.StartNewCareer())
         {
-            case SceneState.Startup:
-                MainCamera.StartupToCareer();
-                break;
-            case SceneState.Contract:
-                MainCamera.ContractToCareer();
-                break;
+            Debug.LogError("Failed to start a new career.");
+            return;
         }
-        _state = SceneState.Career;
-        _careerCanvas.gameObject.SetActive(true);
-        _startupCanvas.gameObject.SetActive(false);
-        _contractCanvas.gameObject.SetActive(false);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Career", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
-    public void GoToStartup()
+    public void GoToContinueCareer()
     {
-        if (_state == SceneState.Startup) return;
-        switch (_state)
+        if (!GameManager.LoadCareer())
         {
-            case SceneState.Career:
-                MainCamera.CareerToStartup();
-                break;
+            Debug.LogWarning("No saved career found.");
+            return;
         }
-        _state = SceneState.Startup;
-        _startupCanvas.gameObject.SetActive(true);
-        _careerCanvas.gameObject.SetActive(false);
-        _contractCanvas.gameObject.SetActive(false);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Career", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
-    public void GoToContract()
+    public void GoToSettings()
     {
-        if (_state == SceneState.Contract) return;
-        switch (_state)
-        {
-            case SceneState.Career:
-                MainCamera.CareerToContract();
-                break;
-        }
-        _state = SceneState.Contract;
-        _startupCanvas.gameObject.SetActive(false);
-        _careerCanvas.gameObject.SetActive(false);
-        _contractCanvas.gameObject.SetActive(true);
+        // TODO: Implement settings menu navigation
+    }
+
+    public void ExitGame()
+    {
+        Application.Quit();
     }
 }
