@@ -25,13 +25,22 @@ public class T_MG_MK1 : MachineGun
         base.Update();
     }
 
+    protected override bool isTargetLocked_()
+    {
+        if (!isTargetAvailable_())
+            return false;
+        var direction = target.transform.position - endPoint.position;
+        var angle = Vector3.Angle(-endPoint.forward, direction);
+        var result = angle < targetingAngleTolerance;
+        Debug.DrawRay(endPoint.position, direction, result ? Color.green : Color.red);
+        return result;
+    }
     override protected void PerformTargeting()
     {
-        if (target is null)
+        if (!isTargetAvailable_())
             return;
         // It's going to be weird. Unity uses left-handed coordinate system, while blend uses right-handed coordinate system.
         var direction = target.transform.position - barrel.transform.position;
-        Debug.DrawRay(barrel.transform.position, direction, Color.green);
 
         var targetShoulderDirection = Vector3.ProjectOnPlane(direction, platform.transform.forward);
         var targetShoulderAngle = Vector3.SignedAngle(shoulder.transform.up, targetShoulderDirection, platform.transform.forward);

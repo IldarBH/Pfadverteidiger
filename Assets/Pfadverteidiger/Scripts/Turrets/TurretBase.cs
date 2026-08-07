@@ -1,9 +1,13 @@
 using UnityEngine;
 
-public class TurretBase : MonoBehaviour
+public abstract class TurretBase : MonoBehaviour
 {
     public float targetingSpeed = 20f;
     public float targetingAngleTolerance = 5f;
+    [field: SerializeField] public float fireCooldown = 0.5f;
+    [field: SerializeField] public float ammoCooldown = 5f;
+    [field: SerializeField] public uint ammoCapacity { get; private set; } = 30;
+    [field: SerializeField] public uint ammoCapacityMax { get; private set; } = 30;
     public Transform endPoint;
     public enum State
     {
@@ -21,68 +25,40 @@ public class TurretBase : MonoBehaviour
     public GameObject target {get; private set;} = null;
     public TargetingMode targetingMode { get; set; } = TargetingMode.Nearest;
 
+    void Awake()
+    {
+        ammoCapacity = ammoCapacityMax;
+    }
+
     protected virtual void Update()
     {
         switch (currentState)
         {
             case State.Idle:
                 PerformSearching();
-                if (isTargetAvailable())
-                {
+                if (isTargetAvailable_())
                     currentState = State.Targeting;
-                    break;
-                }
                 break;
             case State.Targeting:
-                if (!isTargetAvailable())
+                if (!isTargetAvailable_())
                 {
                     currentState = State.Idle;
                     break;
                 }
                 PerformTargeting();
-                if (isTargetLocked())
-                {
-                    StartFiring();
-                    currentState = State.Firing;
-                    break;
-                }
+                if (isTargetLocked_())
+                    StartFiring_();
                 break;
             case State.Firing:
-                if (!isTargetAvailable())
-                {
-                    currentState = State.Idle;
-                    break;
-                }
-                PerformTargeting();
-                if (isAmmoAvailable())
-                {
-                    PerformFiring();
-                } 
-                else
-                {
-                    StartReloading();
-                    currentState = State.Reloading;
-                    break;
-                }
                 break;
             case State.Reloading:
-                PerformReloading();
-                if (isAmmoAvailable())
-                {
-                    currentState = State.Targeting;
-                    break;
-                }
                 break;
             default:
                 break;
         }
     }
 
-    protected virtual void PerformTargeting() {}
-    protected virtual void StartFiring() {}
-    protected virtual void PerformFiring() {}
-    protected virtual void StartReloading() {}
-    protected virtual void PerformReloading() {}
+    protected abstract void PerformTargeting();
 
     private void PerformSearching()
     {
@@ -114,22 +90,62 @@ public class TurretBase : MonoBehaviour
         return nearestEnemy;
     }
 
-    private bool isTargetAvailable()
+    protected bool isAmmoAvailable_() { return ammoCapacity > 0; }
+
+    protected bool isTargetAvailable_() { return target is not null; }
+
+    protected virtual bool isTargetLocked_() { return isTargetAvailable_(); }
+
+    private void StartFiring_()
     {
-        return target is not null;
+        Debug.Log($"Start firing. Ammo capacity: {ammoCapacity}. Cooldown: {fireCooldown}");
+        InvokeRepeating(nameof(Shoot_), 0f, fireCooldown);
+        currentState = State.Firing;
     }
 
-    private bool isTargetLocked()
+    private void StartReloading_()
     {
-        if (target == null)
-            return false;
-        var direction = target.transform.position - endPoint.position;
-        var angle = Vector3.Angle(endPoint.forward, direction);
-        return angle < targetingAngleTolerance;
+        Debug.Log($"Start reloading. Cooldown: {ammoCooldown}");
+        Invoke(nameof(Reload_), ammoCooldown);
+        currentState = State.Reloading;
     }
 
-    private bool isAmmoAvailable()
+    private void StopFiring_()
     {
-        return true; // Placeholder
+        Debug.Log($"Stop firing.");
+        CancelInvoke(nameof(Shoot_));
+        currentState = State.Idle;
+    }
+    
+    private void Shoot_()
+    {
+        if (!isTargetAvailable_())
+        {
+            Debug.Log($"No target available");
+            StopFiring_();
+            return;
+        }
+        if (!isTargetLocked_())
+        {
+            Debug.Log($"Target not locked");
+            StopFiring_();
+            return;
+        }
+        if (!isAmmoAvailable_())
+        {
+            Debug.Log($"Out of ammo");
+            StopFiring_();
+            StartReloading_();
+            return;
+        }
+        ammoCapacity--;
+        Debug.Log($"Shooting. Remaining ammo: {ammoCapacity}");
+        return;
+    }
+
+    private void Reload_()
+    {
+        ammoCapacity = ammoCapacityMax;
+        Debug.Log($"Reloaded. Ammo capacity: {ammoCapacity}");
     }
 }
