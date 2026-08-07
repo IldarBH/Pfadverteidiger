@@ -8,4 +8,11 @@ public abstract class MachineGun : TurretBase
     {
         base.Update();
     }
+
+    protected override void PerformShoot_()
+    {
+        var bullet = Instantiate(bulletPrefab, endPoint.position, Quaternion.identity);
+        bullet.transform.LookAt(target.transform.position);
+        bullet.Initialize(20f);
+    }
 }

@@ -35,7 +35,7 @@ public class T_MG_MK1 : MachineGun
         Debug.DrawRay(endPoint.position, direction, result ? Color.green : Color.red);
         return result;
     }
-    override protected void PerformTargeting()
+    protected override void PerformTargeting_()
     {
         if (!isTargetAvailable_())
             return;

@@ -45,7 +45,7 @@ public abstract class TurretBase : MonoBehaviour
                     currentState = State.Idle;
                     break;
                 }
-                PerformTargeting();
+                PerformTargeting_();
                 if (isTargetLocked_())
                     StartFiring_();
                 break;
@@ -57,8 +57,6 @@ public abstract class TurretBase : MonoBehaviour
                 break;
         }
     }
-
-    protected abstract void PerformTargeting();
 
     private void PerformSearching()
     {
@@ -139,6 +137,7 @@ public abstract class TurretBase : MonoBehaviour
             return;
         }
         ammoCapacity--;
+        PerformShoot_();
         Debug.Log($"Shooting. Remaining ammo: {ammoCapacity}");
         return;
     }
@@ -146,6 +145,10 @@ public abstract class TurretBase : MonoBehaviour
     private void Reload_()
     {
         ammoCapacity = ammoCapacityMax;
+        currentState = State.Idle;
         Debug.Log($"Reloaded. Ammo capacity: {ammoCapacity}");
     }
+
+    protected abstract void PerformTargeting_();
+    protected abstract void PerformShoot_();
 }
