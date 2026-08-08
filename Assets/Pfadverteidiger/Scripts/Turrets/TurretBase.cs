@@ -2,13 +2,20 @@ using UnityEngine;
 
 public abstract class TurretBase : MonoBehaviour
 {
-    public float targetingSpeed = 20f;
-    public float targetingAngleTolerance = 5f;
-    [field: SerializeField] public float fireCooldown = 0.5f;
-    [field: SerializeField] public float ammoCooldown = 5f;
-    [field: SerializeField] public uint ammoCapacity { get; private set; } = 30;
     [field: SerializeField] public uint ammoCapacityMax { get; private set; } = 30;
-    public Transform endPoint;
+    [field: SerializeField] public float ammoReloadTime { get; private set; } = 0.1f;
+    [field: SerializeField] public float fireReloadTime { get; private set; } = 0.5f;
+
+    private uint ammoAvailable_ = 0;
+    private uint ammoCapacity_ = 0;
+    private float ammoReloadTimer_ = 0f;
+    private float fireReloadTimer_ = 0f;
+
+    [field: SerializeField] public float targetingSpeed { get; private set; } = 30f;
+    [field: SerializeField] public float targetingAngleTolerance { get; private set; } = 5f;
+    [field: SerializeField] public float firingRangeMin { get; private set; } = 0f;
+    [field: SerializeField] public float firingRangeMax { get; private set; } = 8f;
+
     public enum State
     {
         Idle,
@@ -22,43 +29,136 @@ public abstract class TurretBase : MonoBehaviour
     }
 
     public State currentState { get; protected set; } = State.Idle;
-    public GameObject target {get; private set;} = null;
+    public GameObject target { get; private set; } = null;
     public TargetingMode targetingMode { get; set; } = TargetingMode.Nearest;
-
-    void Awake()
-    {
-        ammoCapacity = ammoCapacityMax;
-    }
 
     protected virtual void Update()
     {
         switch (currentState)
         {
             case State.Idle:
-                PerformSearching();
-                if (isTargetAvailable_())
-                    currentState = State.Targeting;
+                ExecuteIdleState_();
                 break;
             case State.Targeting:
-                if (!isTargetAvailable_())
-                {
-                    currentState = State.Idle;
-                    break;
-                }
-                PerformTargeting_();
-                if (isTargetLocked_())
-                    StartFiring_();
+                ExecuteTargetingState_();
                 break;
             case State.Firing:
+                ExecuteFiringState_();
                 break;
             case State.Reloading:
+                ExecuteReloadingState_();
                 break;
             default:
                 break;
         }
     }
 
-    private void PerformSearching()
+    private void ExecuteIdleState_()
+    {
+        if (!isAmmoAvailable_())
+        {
+            StartReloading_();
+            return;
+        }
+        PerformSearching_();
+        if (isTargetAvailable_())
+        {
+            StartTargeting_();
+            return;
+        }
+    }
+
+    private void ExecuteTargetingState_()
+    {
+        if (!isTargetAvailable_())
+        {
+            currentState = State.Idle;
+            return;
+        }
+        PerformTargeting_();
+        if (isTargetLocked_())
+        {
+            StartFiring_();
+        }
+    }
+
+    private void ExecuteFiringState_()
+    {
+        if (!isTargetAvailable_())
+        {
+            StopFiring_();
+        }
+        else if (!isTargetLocked_())
+        {
+            StopFiring_();
+            StartTargeting_();
+        }
+        else if (!isAmmoAvailable_())
+        {
+            StopFiring_();
+            StartReloading_();
+        }
+        else if (fireReloadTimer_ > 0f)
+        {
+            fireReloadTimer_ -= Time.deltaTime;
+        }
+        else
+        {
+            PerformFiring_();
+        }
+    }
+
+    private void ExecuteReloadingState_()
+    {
+        if (ammoReloadTimer_ > 0f)
+        {
+            ammoReloadTimer_ -= Time.deltaTime;
+        }
+        else if (!isAmmoReloaded_())
+        {
+            PerformReloading_();
+        }
+        else
+        {
+            StopReloading_();
+        }
+    }
+
+    private GameObject FindNearestTarget()
+    {
+        GameObject nearestEnemy = null;
+        float nearestDistance = Mathf.Infinity;
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        foreach (GameObject enemy in enemies)
+        {
+            float distance = Vector3.Distance(transform.position, enemy.transform.position);
+            if (distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestEnemy = enemy;
+            }
+        }
+
+        return nearestEnemy;
+    }
+
+    private void PerformFiring_()
+    {
+        PerformFiring_Implementation_();
+        ammoAvailable_--;
+        ammoCapacity_--;
+        fireReloadTimer_ = fireReloadTime;
+    }
+
+    private void PerformReloading_()
+    {
+        PerformReloading_Implementation_();
+        ammoCapacity_++;
+        ammoReloadTimer_ = ammoReloadTime;
+    }
+
+    private void PerformSearching_()
     {
         switch (targetingMode)
         {
@@ -71,84 +171,49 @@ public abstract class TurretBase : MonoBehaviour
         }
     }
 
-    private GameObject FindNearestTarget()
+    private void PerformTargeting_()
     {
-        GameObject nearestEnemy = null;
-        float nearestDistance = Mathf.Infinity;
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        foreach (GameObject enemy in enemies)
-        {
-            float distance = Vector3.Distance(transform.position, enemy.transform.position);
-            if (distance < nearestDistance)
-            {
-                nearestDistance = distance;
-                nearestEnemy = enemy;
-            }
-        }
-        return nearestEnemy;
+        PerformTargeting_Implementation_();
     }
-
-    protected bool isAmmoAvailable_() { return ammoCapacity > 0; }
-
-    protected bool isTargetAvailable_() { return target is not null; }
-
-    protected virtual bool isTargetLocked_() { return isTargetAvailable_(); }
 
     private void StartFiring_()
     {
-        Debug.Log($"Start firing. Ammo capacity: {ammoCapacity}. Cooldown: {fireCooldown}");
-        InvokeRepeating(nameof(Shoot_), 0f, fireCooldown);
         currentState = State.Firing;
     }
 
     private void StartReloading_()
     {
-        Debug.Log($"Start reloading. Cooldown: {ammoCooldown}");
-        Invoke(nameof(Reload_), ammoCooldown);
+        ammoReloadTimer_ = ammoReloadTime;
         currentState = State.Reloading;
+    }
+
+    private void StartTargeting_()
+    {
+        currentState = State.Targeting;
     }
 
     private void StopFiring_()
     {
-        Debug.Log($"Stop firing.");
-        CancelInvoke(nameof(Shoot_));
         currentState = State.Idle;
     }
-    
-    private void Shoot_()
+
+    private void StopReloading_()
     {
-        if (!isTargetAvailable_())
-        {
-            Debug.Log($"No target available");
-            StopFiring_();
-            return;
-        }
-        if (!isTargetLocked_())
-        {
-            Debug.Log($"Target not locked");
-            StopFiring_();
-            return;
-        }
-        if (!isAmmoAvailable_())
-        {
-            Debug.Log($"Out of ammo");
-            StopFiring_();
-            StartReloading_();
-            return;
-        }
-        ammoCapacity--;
-        PerformShoot_();
-        Debug.Log($"Shooting. Remaining ammo: {ammoCapacity}");
-        return;
+        ammoAvailable_ = ammoCapacity_;
+        currentState = State.Firing;
     }
 
-    private void Reload_()
-    {
-        ammoCapacity = ammoCapacityMax;
-        currentState = State.Idle;
-        Debug.Log($"Reloaded. Ammo capacity: {ammoCapacity}");
-    }
+    protected abstract void PerformFiring_Implementation_();
 
-    protected abstract void PerformTargeting_();
-    protected abstract void PerformShoot_();
+    protected abstract void PerformReloading_Implementation_();
+
+    protected abstract void PerformTargeting_Implementation_();
+
+    private bool isAmmoAvailable_() { return ammoAvailable_ > 0; }
+
+    private bool isAmmoReloaded_() { return ammoCapacity_ >= ammoCapacityMax; }
+
+    protected bool isTargetAvailable_() { return target is not null; }
+
+    protected virtual bool isTargetLocked_() { return isTargetAvailable_(); }
 }

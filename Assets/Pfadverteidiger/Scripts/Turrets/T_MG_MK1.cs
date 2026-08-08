@@ -17,39 +17,43 @@ public class T_MG_MK1 : MachineGun
             body = shoulder.transform.Find("Body").gameObject;
         if (barrel == null)
             barrel = body.transform.Find("Barrel").gameObject;
-        endPoint = barrel.transform;
+        barrel_ = barrel.transform;
     }
 
-    protected override void Update()
+    protected override void PerformFiring_Implementation_()
     {
-        base.Update();
+        var bullet = Instantiate(bulletPrefab, barrel_.position, Quaternion.identity);
+        bullet.transform.LookAt(target.transform.position);
+        bullet.Initialize(bulletSpeed, bulletDamage);
     }
 
     protected override bool isTargetLocked_()
     {
         if (!isTargetAvailable_())
             return false;
-        var direction = target.transform.position - endPoint.position;
-        var angle = Vector3.Angle(-endPoint.forward, direction);
+        var direction = target.transform.position - barrel_.position;
+        Debug.DrawRay(barrel_.position, direction, Color.blue);
+        Debug.DrawRay(barrel_.position, -barrel_.forward * firingRangeMax, Color.red);
+        if (direction.magnitude > firingRangeMax || direction.magnitude < firingRangeMin)
+            return false;
+        var angle = Vector3.Angle(-barrel_.forward, direction);
         var result = angle < targetingAngleTolerance;
-        Debug.DrawRay(endPoint.position, direction, result ? Color.green : Color.red);
         return result;
     }
-    protected override void PerformTargeting_()
+
+    protected override void PerformTargeting_Implementation_()
     {
-        if (!isTargetAvailable_())
-            return;
         // It's going to be weird. Unity uses left-handed coordinate system, while blend uses right-handed coordinate system.
-        var direction = target.transform.position - barrel.transform.position;
+        var direction = target.transform.position - barrel_.position;
 
-        var targetShoulderDirection = Vector3.ProjectOnPlane(direction, platform.transform.forward);
-        var targetShoulderAngle = Vector3.SignedAngle(shoulder.transform.up, targetShoulderDirection, platform.transform.forward);
+        var targetShoulderDirection = Vector3.ProjectOnPlane(direction, shoulder.transform.forward);
+        var targetShoulderAngle = Vector3.SignedAngle(shoulder.transform.up, targetShoulderDirection, shoulder.transform.forward);
         var deltaShoulderAngle = Mathf.Clamp(targetShoulderAngle, -targetingSpeed * Time.deltaTime, targetingSpeed * Time.deltaTime);
-        shoulder.transform.Rotate(platform.transform.forward, deltaShoulderAngle, Space.World);
+        shoulder.transform.Rotate(shoulder.transform.forward, deltaShoulderAngle, Space.World);
 
-        var targetBodyDirection = Vector3.ProjectOnPlane(direction, shoulder.transform.right);
-        var targetBodyAngle = Vector3.SignedAngle(body.transform.up, targetBodyDirection, shoulder.transform.right);
+        var targetBodyDirection = Vector3.ProjectOnPlane(direction, body.transform.right);
+        var targetBodyAngle = Vector3.SignedAngle(body.transform.up, targetBodyDirection, body.transform.right);
         var deltaBodyAngle = Mathf.Clamp(targetBodyAngle, -targetingSpeed * Time.deltaTime, targetingSpeed * Time.deltaTime);
-        body.transform.Rotate(shoulder.transform.right, deltaBodyAngle, Space.World);
+        body.transform.Rotate(body.transform.right, deltaBodyAngle, Space.World);
     }
 }
