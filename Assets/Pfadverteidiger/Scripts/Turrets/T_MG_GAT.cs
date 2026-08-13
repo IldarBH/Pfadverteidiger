@@ -1,14 +1,15 @@
 using UnityEngine;
 
-public class T_MG_TWIN : MachineGun
+public class T_MG_GAT : MachineGun
 {
     public GameObject Joint1;
     public GameObject Joint2;
     public GameObject Joint3;
     public GameObject Joint4;
-    public float minAltitudeAngle = 80f;
-    public float maxAltitudeAngle = 140f;
-
+    public GameObject Joint5;
+    public float minAltitude = 30f;
+    public float maxAltitude = 120f;
+    
     protected override void Awake()
     {
         base.Awake();
@@ -20,11 +21,11 @@ public class T_MG_TWIN : MachineGun
             Joint3 = Joint2.transform.Find("Joint.003").gameObject;
         if (Joint4 == null)
             Joint4 = Joint3.transform.Find("Joint.004").gameObject;
+        if (Joint5 == null)
+            Joint5 = Joint4.transform.Find("Joint.005").gameObject;
         _JointAzimuth = Joint2.transform;
         _JointAltitude = Joint4.transform;
-        _barrel = Joint4.transform;
-        SetAltitudeLimits(minAltitudeAngle, maxAltitudeAngle);
+        _barrel = Joint5.transform;
+        SetAltitudeLimits(minAltitude, maxAltitude);
     }
-
-    protected override Vector3 GetBarrelDirection_() { return _barrel.up; }
 }
