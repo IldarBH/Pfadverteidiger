@@ -12,11 +12,6 @@ public abstract class TurretBase : MonoBehaviour
     private float ammoReloadTimer_ = 0f;
     private float fireReloadTimer_ = 0f;
 
-    [field: SerializeField] public float targetingSpeed { get; private set; } = 30f;
-    [field: SerializeField] public float targetingAngleTolerance { get; private set; } = 5f;
-    [field: SerializeField] public float firingRangeMin { get; private set; } = 0f;
-    [field: SerializeField] public float firingRangeMax { get; private set; } = 8f;
-
     private Animator animator_ = null;
     private Coroutine disableAnimatorRoutine_ = null;
 

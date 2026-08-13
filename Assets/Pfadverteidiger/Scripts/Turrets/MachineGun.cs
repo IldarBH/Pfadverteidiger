@@ -20,12 +20,12 @@ public abstract class MachineGun : TurretBase
 
         var targetAzimuthDirection = Vector3.ProjectOnPlane(direction, _JointAzimuth.forward);
         var targetAzimuthAngle = Vector3.SignedAngle(_JointAzimuth.up, targetAzimuthDirection, _JointAzimuth.forward);
-        var deltaAzimuthAngle = Mathf.Clamp(targetAzimuthAngle, -targetingSpeed * Time.deltaTime, targetingSpeed * Time.deltaTime);
+        var deltaAzimuthAngle = Mathf.Clamp(targetAzimuthAngle, -_data_mg.targetingSpeed * Time.deltaTime, _data_mg.targetingSpeed * Time.deltaTime);
         _JointAzimuth.Rotate(_JointAzimuth.forward, deltaAzimuthAngle, Space.World);
 
         var targetAltitudeDirection = Vector3.ProjectOnPlane(direction, _JointAltitude.right);
         var targetAltitudeAngle = Vector3.SignedAngle(_JointAltitude.up, targetAltitudeDirection, _JointAltitude.right);
-        var deltaAltitudeAngle = Mathf.Clamp(targetAltitudeAngle, -targetingSpeed * Time.deltaTime, targetingSpeed * Time.deltaTime);
+        var deltaAltitudeAngle = Mathf.Clamp(targetAltitudeAngle, -_data_mg.targetingSpeed * Time.deltaTime, _data_mg.targetingSpeed * Time.deltaTime);
         
         var currentAltitudeAngle = Vector3.SignedAngle(_JointAltitude.parent.forward, _JointAltitude.forward, _JointAltitude.parent.right);
         var maxAltitudeCondition = deltaAltitudeAngle > 0f && currentAltitudeAngle > _data_mg.maxAltitudeAngle;
@@ -49,17 +49,22 @@ public abstract class MachineGun : TurretBase
     {
         if (!isTargetAvailable_())
             return false;
-        // For that model direction of barrel_ is along its local up (green) axis
+        
         var target_direction = target.transform.position - _barrel.position;
-        var barrel_direction = GetBarrelDirection_();
-        var angle = Vector3.Angle(barrel_direction, target_direction);
         Debug.DrawRay(_barrel.position, target_direction, Color.blue);
-        if (target_direction.magnitude > firingRangeMax || target_direction.magnitude < firingRangeMin || angle > targetingAngleTolerance)
+        if (target_direction.magnitude > _data_mg.firingRangeMax)
         {
-            Debug.DrawRay(_barrel.position, barrel_direction * firingRangeMax, Color.red);
+            Debug.DrawRay(_barrel.position, target_direction, Color.red);
             return false;
         }
-        Debug.DrawRay(_barrel.position, barrel_direction * firingRangeMax, Color.green);
+        var barrel_direction = GetBarrelDirection_();
+        var angle = Vector3.Angle(barrel_direction, target_direction);
+        if (angle > _data_mg.firingAngleTolerance)
+        {
+            Debug.DrawRay(_barrel.position, barrel_direction * _data_mg.firingRangeMax, Color.red);
+            return false;
+        }
+        Debug.DrawRay(_barrel.position, barrel_direction * _data_mg.firingRangeMax, Color.green);
         return true;
     }
 
