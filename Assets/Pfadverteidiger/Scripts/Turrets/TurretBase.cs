@@ -3,15 +3,9 @@ using UnityEngine;
 
 public abstract class TurretBase : MonoBehaviour
 {
-    [field: SerializeField] public uint ammoCapacityMax { get; private set; } = 30;
-    [field: SerializeField] public float ammoReloadTime { get; private set; } = 0.1f;
-    [field: SerializeField] public float fireReloadTime { get; private set; } = 0.5f;
-
     private uint ammoAvailable_ = 0;
-    private uint ammoCapacity_ = 0;
     private float ammoReloadTimer_ = 0f;
     private float fireReloadTimer_ = 0f;
-
     private Animator animator_ = null;
     private Coroutine disableAnimatorRoutine_ = null;
 
@@ -104,25 +98,27 @@ public abstract class TurretBase : MonoBehaviour
         if (!isTargetAvailable_())
         {
             StopFiring_();
+            return;
         }
-        else if (!isTargetLocked_())
+        if (!isTargetLocked_())
         {
             StopFiring_();
             StartTargeting_();
+            return;
         }
-        else if (!isAmmoAvailable_())
+        if (!isAmmoAvailable_())
         {
             StopFiring_();
             StartReloading_();
+            return;
         }
-        else if (fireReloadTimer_ > 0f)
+        PerformTargeting_();
+        if (fireReloadTimer_ > 0f)
         {
             fireReloadTimer_ -= Time.deltaTime;
-        }
-        else
+        } else
         {
-            PerformTargeting_();
-            PerformFiring_();
+            PerformFiring_();   
         }
     }
 
@@ -132,13 +128,13 @@ public abstract class TurretBase : MonoBehaviour
         {
             ammoReloadTimer_ -= Time.deltaTime;
         }
-        else if (!isAmmoReloaded_())
+        else if(isAmmoReloaded_())
         {
-            PerformReloading_();
+            StopReloading_();
         }
         else
         {
-            StopReloading_();
+            PerformReloading_();
         }
     }
 
@@ -165,15 +161,14 @@ public abstract class TurretBase : MonoBehaviour
     {
         PerformFiring_Implementation_();
         ammoAvailable_--;
-        ammoCapacity_--;
-        fireReloadTimer_ = fireReloadTime;
+        fireReloadTimer_ = _data.firingReloadRate;
     }
 
     private void PerformReloading_()
     {
         PerformReloading_Implementation_();
-        ammoCapacity_++;
-        ammoReloadTimer_ = ammoReloadTime;
+        ammoAvailable_++;
+        ammoReloadTimer_ = _data.ammoReloadRate;
     }
 
     private void PerformSearching_()
@@ -203,7 +198,7 @@ public abstract class TurretBase : MonoBehaviour
     private void StartReloading_()
     {
         Debug.Log($"Starting to reload.", gameObject);
-        ammoReloadTimer_ = ammoReloadTime;
+        ammoReloadTimer_ = _data.ammoReloadRate;
         currentState = State.Reloading;
     }
 
@@ -219,8 +214,7 @@ public abstract class TurretBase : MonoBehaviour
 
     private void StopReloading_()
     {
-        Debug.Log($"Finished reloading. Ammo capacity: {ammoCapacity_}/{ammoCapacityMax}.", gameObject);
-        ammoAvailable_ = ammoCapacity_;
+        Debug.Log($"Finished reloading. Ammo capacity: {ammoAvailable_}/{_data.ammoCapacityMax}.", gameObject);
         currentState = State.Firing;
     }
 
@@ -232,7 +226,7 @@ public abstract class TurretBase : MonoBehaviour
 
     private bool isAmmoAvailable_() { return ammoAvailable_ > 0; }
 
-    private bool isAmmoReloaded_() { return ammoCapacity_ >= ammoCapacityMax; }
+    private bool isAmmoReloaded_() { return ammoAvailable_ >= _data.ammoCapacityMax; }
 
     protected bool isTargetAvailable_() { return target is not null; }
 
