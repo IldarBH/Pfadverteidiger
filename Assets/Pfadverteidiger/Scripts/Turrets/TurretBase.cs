@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public abstract class TurretBase : MonoBehaviour
@@ -16,6 +17,9 @@ public abstract class TurretBase : MonoBehaviour
     [field: SerializeField] public float firingRangeMin { get; private set; } = 0f;
     [field: SerializeField] public float firingRangeMax { get; private set; } = 8f;
 
+    private Animator animator_ = null;
+    private Coroutine disableAnimatorRoutine_ = null;
+
     public enum State
     {
         Idle,
@@ -31,6 +35,23 @@ public abstract class TurretBase : MonoBehaviour
     public State currentState { get; protected set; } = State.Idle;
     public GameObject target { get; private set; } = null;
     public TargetingMode targetingMode { get; set; } = TargetingMode.Nearest;
+
+    protected virtual void Awake()
+    {
+        animator_ = gameObject.GetComponent<Animator>();
+    }
+
+    void OnEnable()
+    {
+        if (disableAnimatorRoutine_ != null)
+        {
+            StopCoroutine(disableAnimatorRoutine_);
+            disableAnimatorRoutine_ = null;
+        }
+        animator_.enabled = true;
+        animator_.SetBool("active", true);
+        disableAnimatorRoutine_ = StartCoroutine(DisableAnimatorAfterCompletion_());
+    }
 
     protected virtual void Update()
     {
@@ -104,6 +125,7 @@ public abstract class TurretBase : MonoBehaviour
         }
         else
         {
+            PerformTargeting_();
             PerformFiring_();
         }
     }
@@ -178,11 +200,13 @@ public abstract class TurretBase : MonoBehaviour
 
     private void StartFiring_()
     {
+        Debug.Log($"Starting to fire at target: {target.name}.", gameObject);
         currentState = State.Firing;
     }
 
     private void StartReloading_()
     {
+        Debug.Log($"Starting to reload.", gameObject);
         ammoReloadTimer_ = ammoReloadTime;
         currentState = State.Reloading;
     }
@@ -199,6 +223,7 @@ public abstract class TurretBase : MonoBehaviour
 
     private void StopReloading_()
     {
+        Debug.Log($"Finished reloading. Ammo capacity: {ammoCapacity_}/{ammoCapacityMax}.", gameObject);
         ammoAvailable_ = ammoCapacity_;
         currentState = State.Firing;
     }
@@ -216,4 +241,21 @@ public abstract class TurretBase : MonoBehaviour
     protected bool isTargetAvailable_() { return target is not null; }
 
     protected virtual bool isTargetLocked_() { return isTargetAvailable_(); }
+
+    private IEnumerator DisableAnimatorAfterCompletion_()
+    {
+        yield return null;
+
+        while (animator_ != null && (animator_.IsInTransition(0) || animator_.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f))
+        {
+            yield return null;
+        }
+
+        if (animator_ != null)
+        {
+            animator_.enabled = false;
+        }
+
+        disableAnimatorRoutine_ = null;
+    }
 }
