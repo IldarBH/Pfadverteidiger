@@ -6,8 +6,6 @@ public class T_MG_TWIN : MachineGun
     public GameObject Joint2;
     public GameObject Joint3;
     public GameObject Joint4;
-    public float minAltitudeAngle = 80f;
-    public float maxAltitudeAngle = 140f;
 
     protected override void Awake()
     {
@@ -23,7 +21,7 @@ public class T_MG_TWIN : MachineGun
         _JointAzimuth = Joint2.transform;
         _JointAltitude = Joint4.transform;
         _barrel = Joint4.transform;
-        SetAltitudeLimits(minAltitudeAngle, maxAltitudeAngle);
+        _data = new TurretData_MG_Twin();
     }
 
     protected override Vector3 GetBarrelDirection_() { return _barrel.up; }

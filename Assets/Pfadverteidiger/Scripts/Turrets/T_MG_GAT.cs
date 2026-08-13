@@ -7,8 +7,6 @@ public class T_MG_GAT : MachineGun
     public GameObject Joint3;
     public GameObject Joint4;
     public GameObject Joint5;
-    public float minAltitude = 30f;
-    public float maxAltitude = 120f;
     
     protected override void Awake()
     {
@@ -26,6 +24,6 @@ public class T_MG_GAT : MachineGun
         _JointAzimuth = Joint2.transform;
         _JointAltitude = Joint4.transform;
         _barrel = Joint5.transform;
-        SetAltitudeLimits(minAltitude, maxAltitude);
+        _data = new TurretData_MG_Gat();
     }
 }

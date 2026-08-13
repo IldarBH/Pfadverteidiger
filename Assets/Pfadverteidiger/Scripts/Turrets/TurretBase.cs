@@ -35,6 +35,7 @@ public abstract class TurretBase : MonoBehaviour
     public State currentState { get; protected set; } = State.Idle;
     public GameObject target { get; private set; } = null;
     public TargetingMode targetingMode { get; set; } = TargetingMode.Nearest;
+    protected TurretData _data = null;
 
     protected virtual void Awake()
     {

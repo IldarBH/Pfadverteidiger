@@ -2,20 +2,11 @@ using UnityEngine;
 
 public abstract class MachineGun : TurretBase
 {
+    public Bullet bulletPrefab;
     protected Transform _JointAzimuth = null;
     protected Transform _JointAltitude = null;
     protected Transform _barrel = null;
-    private float _minAltitudeAngle;
-    private float _maxAltitudeAngle;
-    public Bullet bulletPrefab;
-    [field: SerializeField] public float bulletSpeed { get; private set; } = 10f;
-    [field: SerializeField] public uint bulletDamage { get; private set; } = 1;
-
-    public void SetAltitudeLimits(float minAltitude, float maxAltitude)
-    {
-        _minAltitudeAngle = minAltitude;
-        _maxAltitudeAngle = maxAltitude;
-    }
+    protected TurretData_MG _data_mg => _data as TurretData_MG;
 
     protected override void Update()
     {
@@ -37,8 +28,8 @@ public abstract class MachineGun : TurretBase
         var deltaAltitudeAngle = Mathf.Clamp(targetAltitudeAngle, -targetingSpeed * Time.deltaTime, targetingSpeed * Time.deltaTime);
         
         var currentAltitudeAngle = Vector3.SignedAngle(_JointAltitude.parent.forward, _JointAltitude.forward, _JointAltitude.parent.right);
-        var maxAltitudeCondition = deltaAltitudeAngle > 0f && currentAltitudeAngle > _maxAltitudeAngle;
-        var minAltitudeCondition = deltaAltitudeAngle < 0f && currentAltitudeAngle < _minAltitudeAngle;
+        var maxAltitudeCondition = deltaAltitudeAngle > 0f && currentAltitudeAngle > _data_mg.maxAltitudeAngle;
+        var minAltitudeCondition = deltaAltitudeAngle < 0f && currentAltitudeAngle < _data_mg.minAltitudeAngle;
         if (!maxAltitudeCondition && !minAltitudeCondition)
         {
             _JointAltitude.Rotate(_JointAltitude.right, deltaAltitudeAngle, Space.World);
