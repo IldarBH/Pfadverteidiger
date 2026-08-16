@@ -8,9 +8,9 @@ public class T_MG_GAT : MachineGun
     public GameObject Joint4;
     public GameObject Joint5;
     
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
+        base.Initialize(new TurretData_MG_Gat());
         if (Joint1 == null)
             Joint1 = transform.Find("Joint.001").gameObject;
         if (Joint2 == null)
@@ -24,6 +24,5 @@ public class T_MG_GAT : MachineGun
         _JointAzimuth = Joint2.transform;
         _JointAltitude = Joint4.transform;
         _barrel = Joint5.transform;
-        _data = new TurretData_MG_Gat();
     }
 }

@@ -7,9 +7,9 @@ public class T_MG_TWIN : MachineGun
     public GameObject Joint3;
     public GameObject Joint4;
 
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
+        base.Initialize(new TurretData_MG_Twin());
         if (Joint1 == null)
             Joint1 = transform.Find("Joint.001").gameObject;
         if (Joint2 == null)
@@ -21,7 +21,6 @@ public class T_MG_TWIN : MachineGun
         _JointAzimuth = Joint2.transform;
         _JointAltitude = Joint4.transform;
         _barrel = Joint4.transform;
-        _data = new TurretData_MG_Twin();
     }
 
     protected override Vector3 GetBarrelDirection_() { return _barrel.up; }

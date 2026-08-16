@@ -3,12 +3,6 @@ using UnityEngine;
 
 public abstract class TurretBase : MonoBehaviour
 {
-    private uint ammoAvailable_ = 0;
-    private float ammoReloadTimer_ = 0f;
-    private float fireReloadTimer_ = 0f;
-    private Animator animator_ = null;
-    private Coroutine disableAnimatorRoutine_ = null;
-
     public enum State
     {
         Idle,
@@ -16,23 +10,39 @@ public abstract class TurretBase : MonoBehaviour
         Firing,
         Reloading
     }
-    public enum TargetingMode
-    {
-        Nearest
-    }
-
     public State currentState { get; protected set; } = State.Idle;
-    public GameObject target { get; private set; } = null;
-    public TargetingMode targetingMode { get; set; } = TargetingMode.Nearest;
-    protected TurretData _data = null;
-
-    protected virtual void Awake()
+    private uint ammoAvailable_ = 0;
+    private float ammoReloadTimer_ = 0f;
+    private float fireReloadTimer_ = 0f;
+    private Animator animator_ = null;
+    private Coroutine disableAnimatorRoutine_ = null;
+    protected TurretData data_ = null;
+    protected TargetTracker targetTracker_ = null;
+    
+    protected void Initialize(TurretData _data)
     {
+        if (_data == null)
+        {
+            Debug.LogError($"{nameof(TurretBase)} received null turret data on {gameObject.name}.", gameObject);
+            enabled = false;
+            return;
+        }
+        data_ = _data;
         animator_ = gameObject.GetComponent<Animator>();
+        if (animator_ == null)
+        {
+            Debug.LogError($"Missing {nameof(Animator)} component on {gameObject.name}.", gameObject);
+            enabled = false;
+            return;
+        }
+        targetTracker_ = new TargetTracker(transform, data_.projectileSpeed);
     }
 
     void OnEnable()
     {
+        if (animator_ == null)
+            return;
+
         if (disableAnimatorRoutine_ != null)
         {
             StopCoroutine(disableAnimatorRoutine_);
@@ -45,6 +55,10 @@ public abstract class TurretBase : MonoBehaviour
 
     protected virtual void Update()
     {
+        if (targetTracker_ == null || data_ == null)
+            return;
+
+        targetTracker_.Update();
         switch (currentState)
         {
             case State.Idle:
@@ -64,6 +78,12 @@ public abstract class TurretBase : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles idle behavior and transitions to other states.
+    /// 1. If ammo is not available, transition to Reloading state.
+    /// 2. If a target is available, transition to Targeting state.
+    /// 3. Otherwise, remain in Idle state.
+    /// </summary>
     private void ExecuteIdleState_()
     {
         if (!isAmmoAvailable_())
@@ -71,7 +91,6 @@ public abstract class TurretBase : MonoBehaviour
             StartReloading_();
             return;
         }
-        PerformSearching_();
         if (isTargetAvailable_())
         {
             StartTargeting_();
@@ -79,6 +98,11 @@ public abstract class TurretBase : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles targeting behavior and transitions to other states.
+    /// 1. If no target is available, transition to Idle state.
+    /// 2. If the target is locked, transition to Firing state.
+    /// </summary>
     private void ExecuteTargetingState_()
     {
         if (!isTargetAvailable_())
@@ -86,7 +110,10 @@ public abstract class TurretBase : MonoBehaviour
             currentState = State.Idle;
             return;
         }
-        PerformTargeting_();
+        if (targetTracker_.isForecastAvailable())
+        {
+            PerformTargeting_();
+        }
         if (isTargetLocked_())
         {
             StartFiring_();
@@ -138,51 +165,21 @@ public abstract class TurretBase : MonoBehaviour
         }
     }
 
-    private GameObject FindNearestTarget()
-    {
-        GameObject nearestEnemy = null;
-        float nearestDistance = Mathf.Infinity;
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-
-        foreach (GameObject enemy in enemies)
-        {
-            float distance = Vector3.Distance(transform.position, enemy.transform.position);
-            if (distance < nearestDistance)
-            {
-                nearestDistance = distance;
-                nearestEnemy = enemy;
-            }
-        }
-
-        return nearestEnemy;
-    }
 
     private void PerformFiring_()
     {
         PerformFiring_Implementation_();
         ammoAvailable_--;
-        fireReloadTimer_ = _data.firingReloadRate;
+        fireReloadTimer_ = data_.firingReloadRate;
     }
 
     private void PerformReloading_()
     {
         PerformReloading_Implementation_();
         ammoAvailable_++;
-        ammoReloadTimer_ = _data.ammoReloadRate;
+        ammoReloadTimer_ = data_.ammoReloadRate;
     }
 
-    private void PerformSearching_()
-    {
-        switch (targetingMode)
-        {
-            case TargetingMode.Nearest:
-                target = FindNearestTarget();
-                break;
-            default:
-                target = null;
-                break;
-        }
-    }
 
     private void PerformTargeting_()
     {
@@ -191,14 +188,14 @@ public abstract class TurretBase : MonoBehaviour
 
     private void StartFiring_()
     {
-        Debug.Log($"Starting to fire at target: {target.name}.", gameObject);
+        Debug.Log($"Starting to fire at target: {targetTracker_.target.name}.", gameObject);
         currentState = State.Firing;
     }
 
     private void StartReloading_()
     {
         Debug.Log($"Starting to reload.", gameObject);
-        ammoReloadTimer_ = _data.ammoReloadRate;
+        ammoReloadTimer_ = data_.ammoReloadRate;
         currentState = State.Reloading;
     }
 
@@ -214,7 +211,7 @@ public abstract class TurretBase : MonoBehaviour
 
     private void StopReloading_()
     {
-        Debug.Log($"Finished reloading. Ammo capacity: {ammoAvailable_}/{_data.ammoCapacityMax}.", gameObject);
+        Debug.Log($"Finished reloading. Ammo capacity: {ammoAvailable_}/{data_.ammoCapacityMax}.", gameObject);
         currentState = State.Firing;
     }
 
@@ -226,9 +223,9 @@ public abstract class TurretBase : MonoBehaviour
 
     private bool isAmmoAvailable_() { return ammoAvailable_ > 0; }
 
-    private bool isAmmoReloaded_() { return ammoAvailable_ >= _data.ammoCapacityMax; }
+    private bool isAmmoReloaded_() { return ammoAvailable_ >= data_.ammoCapacityMax; }
 
-    protected bool isTargetAvailable_() { return target is not null; }
+    protected bool isTargetAvailable_() { return targetTracker_.isTargetAvailable(); }
 
     protected virtual bool isTargetLocked_() { return isTargetAvailable_(); }
 

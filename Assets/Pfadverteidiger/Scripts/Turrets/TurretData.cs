@@ -14,6 +14,7 @@ public abstract class TurretData
     [field: SerializeField] public float firingRangeMax { get; private set; } = float.NaN;
     [field: SerializeField] public float firingReloadRate { get; private set; } = float.NaN;
     [field: SerializeField] public TurretType turretType { get; private set; } = TurretType.MachineGun;
+    [field: SerializeField] public float projectileSpeed { get; private set; } = float.NaN;
     
     protected TurretData(
         uint _ammoCapacityMax,
@@ -21,6 +22,7 @@ public abstract class TurretData
         float _firingRangeMin,
         float _firingRangeMax,
         float _firingReloadRate,
+        float _projectileSpeed,
         TurretType _turretType)
     {
         turretType = _turretType;
@@ -29,6 +31,7 @@ public abstract class TurretData
         firingReloadRate = _firingReloadRate;
         ammoCapacityMax = _ammoCapacityMax;
         ammoReloadRate = _ammoReloadRate;
+        projectileSpeed = _projectileSpeed;
     }
 }
 
@@ -52,6 +55,7 @@ public abstract class TurretData_MG : TurretData
         _firingRangeMin: 0f,
         _firingRangeMax: _firingRangeMax,
         _firingReloadRate: _firingReloadRate,
+        _projectileSpeed: 10f,
         _turretType: TurretType.MachineGun)
     {
         minAltitudeAngle = _minAltitudeAngle;
