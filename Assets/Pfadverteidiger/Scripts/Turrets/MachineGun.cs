@@ -1,8 +1,10 @@
 using UnityEngine;
+using UnityEngine.Pool;
 
 public abstract class MachineGun : TurretBase
 {
     public Bullet bulletPrefab;
+    private IObjectPool<ProjectileBase> projectilePool_ = null;
     protected Transform _JointAzimuth = null;
     protected Transform _JointAltitude = null;
     protected Transform _barrel = null;
@@ -12,6 +14,25 @@ public abstract class MachineGun : TurretBase
     {
         Debug.Log($"MachineGun.Initialize() called for {gameObject.name}");
         base.Initialize(data);
+        projectilePool_ = new ObjectPool<ProjectileBase>(
+            createFunc: () => CreateProjectile_(),
+            actionOnGet: (bullet) => bullet.gameObject.SetActive(true),
+            actionOnRelease: (bullet) => bullet.gameObject.SetActive(false),
+            actionOnDestroy: (bullet) => Destroy(bullet.gameObject),
+            collectionCheck: true,
+            defaultCapacity: 10,
+            maxSize: 100
+        );
+    }
+
+    ProjectileBase CreateProjectile_()
+    {
+        var targetForecast = targetTracker_.targetForecast;
+        var lifetime = (targetForecast - _barrel.position).magnitude / data_.projectileSpeed;
+        Bullet bullet = Instantiate(bulletPrefab, _barrel.position, Quaternion.identity);
+        bullet.transform.LookAt(targetForecast);
+        bullet.Initialize(data_.projectileSpeed, 1, lifetime, projectilePool_);
+        return bullet;
     }
 
     protected override void Update()
@@ -44,9 +65,13 @@ public abstract class MachineGun : TurretBase
 
     protected override void PerformFiring_Implementation_()
     {
-        var bullet = Instantiate(bulletPrefab, _barrel.position, Quaternion.identity);
-        bullet.transform.LookAt(target.transform.position);
-        bullet.Initialize(bulletSpeed, bulletDamage);
+        bool ishit = Random.value < data_mg_.firingAccuracy;
+        var bullet = projectilePool_.Get();
+        bullet.transform.position = _barrel.position;
+        var targetForecast = targetTracker_.targetForecast;
+        bullet.transform.LookAt(targetForecast);
+        bullet.ResetTimer();
+        bullet.gameObject.SetActive(true);
     }
 
     protected override void PerformReloading_Implementation_() { }
@@ -57,22 +82,17 @@ public abstract class MachineGun : TurretBase
             return false;
         
         var target_direction = targetTracker_.target.position - _barrel.position;
-        // Debug.DrawRay(_barrel.position, target_direction, Color.blue);
         var target_forecast_direction = targetTracker_.targetForecast - _barrel.position;
-        // Debug.DrawRay(_barrel.position, target_forecast_direction, Color.cyan);
         if (target_direction.magnitude > data_mg_.firingRangeMax)
         {
-            // Debug.DrawRay(_barrel.position, target_direction, Color.red);
             return false;
         }
         var barrel_direction = GetBarrelDirection_();
         var angle = Vector3.Angle(barrel_direction, target_direction);
         if (angle > data_mg_.firingAngleTolerance)
         {
-            // Debug.DrawRay(_barrel.position, barrel_direction * data_mg_.firingRangeMax, Color.red);
             return false;
         }
-        // Debug.DrawRay(_barrel.position, barrel_direction * data_mg_.firingRangeMax, Color.green);
         return true;
     }
 

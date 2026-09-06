@@ -1,29 +1,32 @@
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class ProjectileBase : MonoBehaviour
 {
     [field: SerializeField] public float speed { get; private set; } = 10f;
     [field: SerializeField] public uint damage { get; private set; } = 1;
     [field: SerializeField] public float lifetime { get; private set; } = 5f;
+    private float lifetimeTimer_ = 0f;
 
-    void Start()
-    {
-        Invoke(nameof(DestroyProjectile), lifetime);
-    }
+    private IObjectPool<ProjectileBase> projectilePool_ = null;
 
-    public void Initialize(float speed, uint damage)
+    public void Initialize(float speed, uint damage, float lifetime, IObjectPool<ProjectileBase> projectilePool)
     {
         this.speed = speed;
         this.damage = damage;
-    }
-
-    public void DestroyProjectile()
-    {
-        Destroy(gameObject);
+        this.lifetime = lifetime;
+        this.projectilePool_ = projectilePool;
+        lifetimeTimer_ = 0f;
     }
 
     void Update()
     {
+        lifetimeTimer_ += Time.deltaTime;
+        if (lifetimeTimer_ >= lifetime)
+        {
+            projectilePool_.Release(this);
+            return;
+        }
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
     }
 
@@ -32,8 +35,12 @@ public class ProjectileBase : MonoBehaviour
         var enemy = collision.gameObject.GetComponent<Enemy>();
         if (enemy != null)
         {
-            enemy.TakeDamage(damage);
-            DestroyProjectile();
+            projectilePool_.Release(this);
         }
+    }
+
+    public void ResetTimer()
+    {
+        lifetimeTimer_ = 0f;
     }
 }

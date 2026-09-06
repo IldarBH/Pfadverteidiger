@@ -9,6 +9,7 @@ public abstract class TurretData
 {
     [field: SerializeField] public uint ammoCapacityMax { get; private set; } = uint.MaxValue;
     [field: SerializeField] public float ammoReloadRate { get; private set; } = float.NaN;
+    [field: SerializeField] public float firingAccuracy { get; private set; } = 1f;
     [field: SerializeField] public float firingAngleTolerance { get; private set; } = 5f;
     [field: SerializeField] public float firingRangeMin { get; private set; } = float.NaN;
     [field: SerializeField] public float firingRangeMax { get; private set; } = float.NaN;
@@ -19,6 +20,7 @@ public abstract class TurretData
     protected TurretData(
         uint _ammoCapacityMax,
         float _ammoReloadRate,
+        float _firingAccuracy,
         float _firingRangeMin,
         float _firingRangeMax,
         float _firingReloadRate,
@@ -26,6 +28,7 @@ public abstract class TurretData
         TurretType _turretType)
     {
         turretType = _turretType;
+        firingAccuracy = _firingAccuracy;
         firingRangeMin = _firingRangeMin;
         firingRangeMax = _firingRangeMax;
         firingReloadRate = _firingReloadRate;
@@ -44,6 +47,7 @@ public abstract class TurretData_MG : TurretData
     public TurretData_MG(
         uint _ammoCapacityMax,
         float _ammoReloadRate,
+        float _firingAccuracy,
         float _firingRangeMax,
         float _firingReloadRate,
         float _maxAltitudeAngle,
@@ -52,6 +56,7 @@ public abstract class TurretData_MG : TurretData
     : base(
         _ammoCapacityMax: _ammoCapacityMax,
         _ammoReloadRate: _ammoReloadRate,
+        _firingAccuracy: _firingAccuracy,
         _firingRangeMin: 0f,
         _firingRangeMax: _firingRangeMax,
         _firingReloadRate: _firingReloadRate,
@@ -70,6 +75,7 @@ public class TurretData_MG_Twin : TurretData_MG
     : base(
         _ammoCapacityMax: 30,
         _ammoReloadRate: 0.2f,
+        _firingAccuracy: 0.6f,
         _firingRangeMax: 10f,
         _firingReloadRate: 0.6f,
         _maxAltitudeAngle: 140f,
@@ -85,6 +91,7 @@ public class TurretData_MG_Gat : TurretData_MG
     : base(
         _ammoCapacityMax: 90,
         _ammoReloadRate: 0.1f,
+        _firingAccuracy: 0.8f,
         _firingRangeMax: 8f,
         _firingReloadRate: 0.2f,
         _maxAltitudeAngle: 120f,
