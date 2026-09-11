@@ -3,7 +3,8 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [field: SerializeField] public uint health { get; private set; } = 10;
-    [field: SerializeField] public float orbitSpeed { get; private set; } = 45f;
+    private float _moveSpeed = 2f;
+    private Vector3 _targetPosition = Vector3.zero;
 
     public void TakeDamage(uint damage)
     {
@@ -19,6 +20,11 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        transform.RotateAround(Vector3.zero, Vector3.up, orbitSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, _targetPosition, _moveSpeed * Time.deltaTime);
+    }
+
+    public void SetTargetPosition(Vector3 targetPosition)
+    {
+        _targetPosition = targetPosition;
     }
 }
