@@ -5,9 +5,11 @@ public class PlayerControl : MonoBehaviour
 {
     public Transform playerTransform;
     private BoundingSphere poseBounds = new BoundingSphere(Vector3.zero, 12f);
-    public float maxDeviation = 1f;
-    public InputActionAsset inputActions;
+    public float maxPoseDeviation = 1f;
     public float moveSpeed = 5f;
+    public float tiltAngle = 12f;
+    public float tiltLerpSpeed = 8f;
+    public InputActionAsset inputActions;
     private InputActionMap _inputActionMap;
     private InputAction _moveAction;
     private Vector3 _moveInputDirection = Vector3.zero;
@@ -64,7 +66,7 @@ public class PlayerControl : MonoBehaviour
             var direction = (playerTransform.position - poseBounds.position).normalized;
             var anchor = poseBounds.position + direction * poseBounds.radius;
             var deviation = anchor - playerTransform.position;
-            var penaltymagnitude = Mathf.Clamp(deviation.magnitude / maxDeviation, 0f, 1f);
+            var penaltymagnitude = Mathf.Clamp(deviation.magnitude / maxPoseDeviation, 0f, 1f);
             var penalty = deviation.normalized * penaltymagnitude;
             Debug.DrawRay(playerTransform.position, penalty, Color.red);
             Debug.Log($"Out of bounds deviation: {deviation.magnitude}, penalty: {penalty.magnitude}");
@@ -73,10 +75,22 @@ public class PlayerControl : MonoBehaviour
         return Vector3.zero;
     }
 
+    private Quaternion CalculateTiltRotation_(Vector3 moveDirection)
+    {
+        float normalizedX = Mathf.Clamp(moveDirection.x, -1f, 1f);
+        float normalizedY = Mathf.Clamp(moveDirection.y, -1f, 1f);
+        float pitch = -normalizedY * tiltAngle;
+        float yaw = normalizedX * tiltAngle;
+        return Quaternion.Euler(pitch, yaw, 0f);
+    }
+
     void Update()
     {
         Vector3 outOfBoundsPenalty = GetOutOfBoundsPenalty_();
         Vector3 finalMoveDirection = _moveInputDirection + outOfBoundsPenalty;
         playerTransform.Translate(finalMoveDirection * moveSpeed * Time.deltaTime, Space.World);
+
+        Quaternion targetRotation = CalculateTiltRotation_(finalMoveDirection);
+        playerTransform.rotation = Quaternion.Lerp(playerTransform.rotation, targetRotation, tiltLerpSpeed * Time.deltaTime);
     }
 }
